@@ -8,6 +8,10 @@ import com.wix.mediaplatform.v8.image.Policy;
 import com.wix.mediaplatform.v8.image.Watermark;
 import com.wix.mediaplatform.v8.service.Destination;
 import com.wix.mediaplatform.v8.service.FileDescriptor;
+import com.wix.mediaplatform.v8.service.FileLifecycle;
+import com.wix.mediaplatform.v8.service.archive.ArchiveSource;
+import com.wix.mediaplatform.v8.service.archive.CreateArchiveJob;
+import com.wix.mediaplatform.v8.service.archive.CreateArchiveRequest;
 import com.wix.mediaplatform.v8.service.file.ImportFileJob;
 import com.wix.mediaplatform.v8.service.job.JobList;
 
@@ -26,7 +30,7 @@ class DemoOperations {
         this.mediaPlatform = mediaPlatform;
     }
 
-    void importFile() throws MediaPlatformException {
+    FileDescriptor importFile() throws MediaPlatformException {
         ImportFileJob importFileJob = mediaPlatform.fileManager().importFileRequest()
                 .setSourceUrl("https://static.wixstatic.com/media/f31d7d0cfc554aacb1d737757c8d3f1b.jpg")
                 .setDestination(new Destination()
@@ -42,9 +46,10 @@ class DemoOperations {
                 .toUrl();
 
         System.out.println("SEE IMPORTED IMAGE @ " + url);
+        return imageFile;
     }
 
-    void uploadImage() throws MediaPlatformException, IOException {
+    FileDescriptor uploadImage() throws MediaPlatformException, IOException {
         String id = UUID.randomUUID().toString();
 
         Path localPath = new File(Objects.requireNonNull(
@@ -61,6 +66,7 @@ class DemoOperations {
 
         image.crop(200, 300, 0, 0, 2);
         System.out.println("SEE UPLOADED IMAGE @ " + image.toUrl());
+        return file;
     }
 
     void uploadImageFromFile() throws MediaPlatformException {
@@ -128,5 +134,30 @@ class DemoOperations {
                 .execute();
 
         System.out.println("JOB LIST: " + jobList.toString());
+    }
+
+    void createArchive() throws MediaPlatformException {
+        FileDescriptor file = this.importFile();
+
+        CreateArchiveRequest request = mediaPlatform.archiveManager().createArchiveRequest()
+                .addSource(
+                        new ArchiveSource().setPath(file.getPath())
+                )
+                .setDestination(
+                        new Destination()
+                                .setPath("/demousage/create-archive/" + UUID.randomUUID().toString() + ".zip")
+                                .setLifecycle(
+                                        new FileLifecycle()
+                                                .setAction(FileLifecycle.Action.DELETE)
+                                                .setAge(123)
+                                )
+                );
+
+        System.out.println("CREATE ARCHIVE REQUEST: " + request.toString());
+        System.out.println("REQUEST LIFECYCLE AGE: " + request.getDestination().getLifecycle().getAge());
+
+        CreateArchiveJob job = request.execute();
+        System.out.println("CREATE ARCHIVE JOB: " + job.toString());
+        System.out.println("JOB LIFECYCLE: " + job.getSpecification().getDestination().getLifecycle());
     }
 }

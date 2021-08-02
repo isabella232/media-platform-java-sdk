@@ -54,8 +54,16 @@ public class Main {
                 e.printStackTrace();
             }
         });
+
+        executor.submit(() -> {
+            try {
+                demoOperations.createArchive();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
 //            demoOperations.transcodeFile();
-//            demoOperations.createArchive();
 //            demoOperations.extractArchive();
 
         executor.shutdown();

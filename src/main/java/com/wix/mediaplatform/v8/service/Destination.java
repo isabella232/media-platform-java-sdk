@@ -8,7 +8,7 @@ public class Destination {
 
     private FileDescriptor.Acl acl = FileDescriptor.Acl.PRIVATE;
 
-    private FileLifecycle fileLifecycle;
+    private FileLifecycle lifecycle;
 
     public Destination() {
     }
@@ -40,12 +40,23 @@ public class Destination {
         return this;
     }
 
-    public FileLifecycle getFileLifecycle() {
-        return fileLifecycle;
+    public FileLifecycle getLifecycle() {
+        return lifecycle;
     }
 
-    public Destination setFileLifecycle(FileLifecycle fileLifecycle) {
-        this.fileLifecycle = fileLifecycle;
+    public Destination setLifecycle(FileLifecycle lifecycle) {
+        this.lifecycle = lifecycle;
+        return this;
+    }
+
+    @Deprecated
+    public FileLifecycle getFileLifecycle() {
+        return lifecycle;
+    }
+
+    @Deprecated
+    public Destination setFileLifecycle(FileLifecycle lifecycle) {
+        this.lifecycle = lifecycle;
         return this;
     }
 }

@@ -37,20 +37,22 @@ public class ArchiveServiceTest extends BaseTest {
         stubFor(post(urlEqualTo("/_api/archive/create"))
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "application/json")
-                        .withBodyFile("create-archive-pending-response.json")));
+                        .withBodyFile("create-archive-with-lifecycle-pending-response.json")));
 
         CreateArchiveJob job = archiveService.createArchiveRequest()
                 .addSource(new ArchiveSource().setFileId("file id"))
                 .setDestination(new Destination()
                         .setPath("/fish/file.zip")
                         .setAcl(FileDescriptor.Acl.PRIVATE)
-                        .setFileLifecycle(new FileLifecycle()
+                        .setLifecycle(new FileLifecycle()
                                 .setAction(FileLifecycle.Action.DELETE)
                                 .setAge(100)))
                 .setArchiveType("zip")
                 .execute();
 
         assertThat(job.getId(), is("6b4da966844d4ae09417300f3811849b_dd0ecc5cbaba4f1b9aba08cc6fa7348b"));
+        assertThat(job.getSpecification().getDestination().getLifecycle().getAge(), is(100));
+        assertThat(job.getSpecification().getDestination().getLifecycle().getAction(), is("delete"));
     }
 
     @Test
